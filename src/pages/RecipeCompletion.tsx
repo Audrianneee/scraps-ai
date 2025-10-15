@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import confetti from "canvas-confetti";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Star, Trophy, Leaf, Home } from "lucide-react";
+import { Star, Trophy, Leaf, Home, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -136,6 +136,11 @@ const RecipeCompletion = () => {
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-4xl mx-auto space-y-8">
+        <Button variant="ghost" onClick={() => navigate("/")}>
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to Home
+        </Button>
+        
         <div className="text-center space-y-4 animate-fade-in">
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/20 mb-4">
             <Trophy className="w-10 h-10 text-primary" />
