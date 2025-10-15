@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, X, ChefHat } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useUserPreferences } from "@/hooks/useUserPreferences";
 
 interface Ingredient {
   name: string;
@@ -14,17 +15,18 @@ interface IngredientInputProps {
   onComplete: (ingredients: Ingredient[], equipment: string[], seasonings: string[]) => void;
 }
 
-const commonSeasoningsList = [
+const defaultSeasonings = [
   "Salt", "Black Pepper", "Olive Oil", "Vegetable Oil", "Garlic Powder",
   "Onion Powder", "Paprika", "Cumin", "Oregano", "Basil", "Thyme", "Rosemary"
 ];
 
-const commonEquipment = [
+const defaultEquipment = [
   "Oven", "Stovetop", "Microwave", "Air Fryer", "Blender", 
   "Food Processor", "Slow Cooker", "Instant Pot", "Grill"
 ];
 
 const IngredientInput = ({ onComplete }: IngredientInputProps) => {
+  const { preferences, updatePreferences, loading } = useUserPreferences();
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [currentIngredient, setCurrentIngredient] = useState("");
   const [currentAmount, setCurrentAmount] = useState("");
@@ -32,8 +34,21 @@ const IngredientInput = ({ onComplete }: IngredientInputProps) => {
   const [selectedSeasonings, setSelectedSeasonings] = useState<string[]>([]);
   const [customSeasoning, setCustomSeasoning] = useState("");
   const [customEquipment, setCustomEquipment] = useState("");
-  const [availableSeasonings, setAvailableSeasonings] = useState<string[]>(commonSeasoningsList);
-  const [availableEquipment, setAvailableEquipment] = useState<string[]>(commonEquipment);
+  const [availableSeasonings, setAvailableSeasonings] = useState<string[]>(defaultSeasonings);
+  const [availableEquipment, setAvailableEquipment] = useState<string[]>(defaultEquipment);
+
+  useEffect(() => {
+    if (!loading && preferences) {
+      // Merge default and saved custom items
+      const allSeasonings = [...new Set([...defaultSeasonings, ...preferences.seasonings])];
+      const allEquipment = [...new Set([...defaultEquipment, ...preferences.equipment])];
+      
+      setAvailableSeasonings(allSeasonings);
+      setAvailableEquipment(allEquipment);
+      setSelectedSeasonings(preferences.seasonings);
+      setSelectedEquipment(preferences.equipment);
+    }
+  }, [loading, preferences]);
 
   const addIngredient = () => {
     if (currentIngredient.trim()) {
@@ -51,33 +66,51 @@ const IngredientInput = ({ onComplete }: IngredientInputProps) => {
   };
 
   const toggleEquipment = (equip: string) => {
-    setSelectedEquipment(prev =>
-      prev.includes(equip)
-        ? prev.filter(e => e !== equip)
-        : [...prev, equip]
-    );
+    const newSelection = selectedEquipment.includes(equip)
+      ? selectedEquipment.filter(e => e !== equip)
+      : [...selectedEquipment, equip];
+    
+    setSelectedEquipment(newSelection);
+    updatePreferences({ equipment: newSelection });
   };
 
   const toggleSeasoning = (seasoning: string) => {
-    setSelectedSeasonings(prev =>
-      prev.includes(seasoning)
-        ? prev.filter(s => s !== seasoning)
-        : [...prev, seasoning]
-    );
+    const newSelection = selectedSeasonings.includes(seasoning)
+      ? selectedSeasonings.filter(s => s !== seasoning)
+      : [...selectedSeasonings, seasoning];
+    
+    setSelectedSeasonings(newSelection);
+    updatePreferences({ seasonings: newSelection });
   };
 
   const addCustomSeasoning = () => {
     if (customSeasoning.trim() && !availableSeasonings.includes(customSeasoning.trim())) {
-      setAvailableSeasonings([...availableSeasonings, customSeasoning.trim()]);
+      const newSeasonings = [...availableSeasonings, customSeasoning.trim()];
+      setAvailableSeasonings(newSeasonings);
       setCustomSeasoning("");
     }
   };
 
   const addCustomEquipment = () => {
     if (customEquipment.trim() && !availableEquipment.includes(customEquipment.trim())) {
-      setAvailableEquipment([...availableEquipment, customEquipment.trim()]);
+      const newEquipment = [...availableEquipment, customEquipment.trim()];
+      setAvailableEquipment(newEquipment);
       setCustomEquipment("");
     }
+  };
+
+  const removeSeasoning = (seasoning: string) => {
+    const newSeasonings = availableSeasonings.filter(s => s !== seasoning);
+    setAvailableSeasonings(newSeasonings);
+    setSelectedSeasonings(selectedSeasonings.filter(s => s !== seasoning));
+    updatePreferences({ seasonings: selectedSeasonings.filter(s => s !== seasoning) });
+  };
+
+  const removeEquipment = (equipment: string) => {
+    const newEquipment = availableEquipment.filter(e => e !== equipment);
+    setAvailableEquipment(newEquipment);
+    setSelectedEquipment(selectedEquipment.filter(e => e !== equipment));
+    updatePreferences({ equipment: selectedEquipment.filter(e => e !== equipment) });
   };
 
   const handleSubmit = () => {
@@ -121,7 +154,6 @@ const IngredientInput = ({ onComplete }: IngredientInputProps) => {
               </Button>
             </div>
 
-            {/* Ingredient List */}
             {ingredients.length > 0 && (
               <div className="space-y-2 mb-4">
                 {ingredients.map((ing, index) => (
@@ -165,14 +197,24 @@ const IngredientInput = ({ onComplete }: IngredientInputProps) => {
             </div>
             <div className="flex flex-wrap gap-2">
               {availableSeasonings.map((seasoning) => (
-                <Badge
-                  key={seasoning}
-                  variant={selectedSeasonings.includes(seasoning) ? "default" : "outline"}
-                  className="cursor-pointer px-3 py-1 transition-all hover:scale-105"
-                  onClick={() => toggleSeasoning(seasoning)}
-                >
-                  {seasoning}
-                </Badge>
+                <div key={seasoning} className="relative group">
+                  <Badge
+                    variant={selectedSeasonings.includes(seasoning) ? "default" : "outline"}
+                    className="cursor-pointer px-3 py-1 transition-all hover:scale-105 pr-8"
+                    onClick={() => toggleSeasoning(seasoning)}
+                  >
+                    {seasoning}
+                  </Badge>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeSeasoning(seasoning);
+                    }}
+                    className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
               ))}
             </div>
           </div>
@@ -193,14 +235,24 @@ const IngredientInput = ({ onComplete }: IngredientInputProps) => {
             </div>
             <div className="flex flex-wrap gap-2">
               {availableEquipment.map((equip) => (
-                <Badge
-                  key={equip}
-                  variant={selectedEquipment.includes(equip) ? "default" : "outline"}
-                  className="cursor-pointer px-4 py-2 transition-all hover:scale-105"
-                  onClick={() => toggleEquipment(equip)}
-                >
-                  {equip}
-                </Badge>
+                <div key={equip} className="relative group">
+                  <Badge
+                    variant={selectedEquipment.includes(equip) ? "default" : "outline"}
+                    className="cursor-pointer px-4 py-2 transition-all hover:scale-105 pr-8"
+                    onClick={() => toggleEquipment(equip)}
+                  >
+                    {equip}
+                  </Badge>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeEquipment(equip);
+                    }}
+                    className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
               ))}
             </div>
           </div>

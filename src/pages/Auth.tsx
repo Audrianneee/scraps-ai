@@ -14,7 +14,9 @@ const Auth = () => {
   const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
 
   useEffect(() => {
     // Check if user is already logged in
@@ -38,15 +40,40 @@ const Auth = () => {
 
   const handleEmailSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!username.trim()) {
+      toast({
+        title: "Username required",
+        description: "Please enter a username",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: `${window.location.origin}/`,
+        data: {
+          username: username.trim()
+        }
       },
     });
+
+    if (!error && data.user) {
+      // Create profile with username
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .update({ username: username.trim() })
+        .eq("id", data.user.id);
+
+      if (profileError) {
+        console.error("Profile update error:", profileError);
+      }
+    }
 
     setLoading(false);
 
@@ -193,6 +220,17 @@ const Auth = () => {
 
               <TabsContent value="signup" className="space-y-4">
                 <form onSubmit={handleEmailSignUp} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-username">Username</Label>
+                    <Input
+                      id="signup-username"
+                      type="text"
+                      placeholder="username"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      required
+                    />
+                  </div>
                   <div className="space-y-2">
                     <Label htmlFor="signup-email">Email</Label>
                     <Input

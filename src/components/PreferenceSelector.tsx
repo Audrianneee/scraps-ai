@@ -1,9 +1,10 @@
-import { useState } from "react";
-import { ChefHat, Plus } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ChefHat, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { useUserPreferences } from "@/hooks/useUserPreferences";
 
 interface Preferences {
   cuisineType: string[];
@@ -15,31 +16,49 @@ interface PreferenceSelectorProps {
   onComplete: (preferences: Preferences) => void;
 }
 
-const cuisineTypes = [
+const defaultCuisines = [
   "Asian", "Italian", "Mexican", "Indian", "Mediterranean",
   "American", "French", "Thai", "Japanese", "Middle Eastern"
 ];
 
 const PreferenceSelector = ({ onComplete }: PreferenceSelectorProps) => {
+  const { preferences, updatePreferences, loading } = useUserPreferences();
   const [selectedCuisines, setSelectedCuisines] = useState<string[]>([]);
   const [customCuisine, setCustomCuisine] = useState("");
-  const [availableCuisines, setAvailableCuisines] = useState<string[]>(cuisineTypes);
+  const [availableCuisines, setAvailableCuisines] = useState<string[]>(defaultCuisines);
   const [calorieRange, setCalorieRange] = useState<[number, number]>([0, 1000]);
   const [timeRange, setTimeRange] = useState<[number, number]>([0, 120]);
 
+  useEffect(() => {
+    if (!loading && preferences) {
+      const allCuisines = [...new Set([...defaultCuisines, ...preferences.cuisines])];
+      setAvailableCuisines(allCuisines);
+      setSelectedCuisines(preferences.cuisines);
+    }
+  }, [loading, preferences]);
+
   const toggleCuisine = (cuisine: string) => {
-    setSelectedCuisines(prev =>
-      prev.includes(cuisine)
-        ? prev.filter(c => c !== cuisine)
-        : [...prev, cuisine]
-    );
+    const newSelection = selectedCuisines.includes(cuisine)
+      ? selectedCuisines.filter(c => c !== cuisine)
+      : [...selectedCuisines, cuisine];
+    
+    setSelectedCuisines(newSelection);
+    updatePreferences({ cuisines: newSelection });
   };
 
   const addCustomCuisine = () => {
     if (customCuisine.trim() && !availableCuisines.includes(customCuisine.trim())) {
-      setAvailableCuisines([...availableCuisines, customCuisine.trim()]);
+      const newCuisines = [...availableCuisines, customCuisine.trim()];
+      setAvailableCuisines(newCuisines);
       setCustomCuisine("");
     }
+  };
+
+  const removeCuisine = (cuisine: string) => {
+    const newCuisines = availableCuisines.filter(c => c !== cuisine);
+    setAvailableCuisines(newCuisines);
+    setSelectedCuisines(selectedCuisines.filter(c => c !== cuisine));
+    updatePreferences({ cuisines: selectedCuisines.filter(c => c !== cuisine) });
   };
 
   const handleSubmit = () => {
@@ -80,14 +99,24 @@ const PreferenceSelector = ({ onComplete }: PreferenceSelectorProps) => {
             </div>
             <div className="flex flex-wrap gap-2">
               {availableCuisines.map((cuisine) => (
-                <Badge
-                  key={cuisine}
-                  variant={selectedCuisines.includes(cuisine) ? "default" : "outline"}
-                  className="cursor-pointer px-4 py-2 transition-all hover:scale-105"
-                  onClick={() => toggleCuisine(cuisine)}
-                >
-                  {cuisine}
-                </Badge>
+                <div key={cuisine} className="relative group">
+                  <Badge
+                    variant={selectedCuisines.includes(cuisine) ? "default" : "outline"}
+                    className="cursor-pointer px-4 py-2 transition-all hover:scale-105 pr-8"
+                    onClick={() => toggleCuisine(cuisine)}
+                  >
+                    {cuisine}
+                  </Badge>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeCuisine(cuisine);
+                    }}
+                    className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
               ))}
             </div>
           </div>

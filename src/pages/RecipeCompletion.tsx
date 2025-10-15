@@ -17,8 +17,13 @@ const RecipeCompletion = () => {
   const [hoveredRating, setHoveredRating] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
+  const [foodWasteSaved, setFoodWasteSaved] = useState(0);
 
   useEffect(() => {
+    // Set constant food waste value
+    const wasteValue = Math.floor(Math.random() * 500 + 200);
+    setFoodWasteSaved(wasteValue);
+
     // Trigger confetti
     const duration = 3 * 1000;
     const end = Date.now() + duration;
@@ -52,18 +57,17 @@ const RecipeCompletion = () => {
   const fetchLeaderboard = async () => {
     const { data } = await supabase
       .from("profiles")
-      .select("display_name, total_points, level")
+      .select("display_name, username, total_points")
       .order("total_points", { ascending: false })
       .limit(5);
     
     if (data) setLeaderboard(data);
   };
 
-  const calculatePoints = (rating: number) => {
-    // Base points: 50
+  const calculatePoints = (rating: number, foodWaste: number) => {
     // Rating bonus: 10 points per star
-    // Food waste bonus: 20 points
-    return 50 + (rating * 10) + 20;
+    // Food waste: 1 point per 10 grams
+    return (rating * 10) + Math.floor(foodWaste / 10);
   };
 
   const handleSubmit = async () => {
@@ -84,8 +88,7 @@ const RecipeCompletion = () => {
       return;
     }
 
-    const pointsEarned = calculatePoints(rating);
-    const foodWasteSaved = Math.random() * 500 + 200; // Random 200-700g
+    const pointsEarned = calculatePoints(rating, foodWasteSaved);
 
     // Insert cooked recipe
     const { error: cookedError } = await supabase
@@ -131,7 +134,7 @@ const RecipeCompletion = () => {
     }, 1500);
   };
 
-  const points = rating > 0 ? calculatePoints(rating) : 0;
+  const points = rating > 0 ? calculatePoints(rating, foodWasteSaved) : 0;
 
   return (
     <div className="min-h-screen bg-background p-6">
@@ -184,7 +187,7 @@ const RecipeCompletion = () => {
                 <span className="font-medium">Food Waste Managed</span>
               </div>
               <p className="text-3xl font-bold text-foreground">
-                ~{Math.floor(Math.random() * 500 + 200)}g
+                ~{foodWasteSaved}g
               </p>
             </div>
 
@@ -212,8 +215,7 @@ const RecipeCompletion = () => {
                       {index + 1}
                     </span>
                     <div>
-                      <p className="font-medium text-foreground">{user.display_name}</p>
-                      <p className="text-sm text-muted-foreground">Level {user.level}</p>
+                      <p className="font-medium text-foreground">{user.username || user.display_name}</p>
                     </div>
                   </div>
                   <p className="font-bold text-primary">{user.total_points} pts</p>
@@ -229,7 +231,7 @@ const RecipeCompletion = () => {
               className="flex-1"
               size="lg"
             >
-              Save & Continue
+              Continue
             </Button>
             <Button
               onClick={() => navigate("/")}
