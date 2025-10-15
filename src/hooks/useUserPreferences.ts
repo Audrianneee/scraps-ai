@@ -5,6 +5,12 @@ export interface UserPreferences {
   seasonings: string[];
   equipment: string[];
   cuisines: string[];
+  customSeasonings: string[];
+  customEquipment: string[];
+  customCuisines: string[];
+  removedSeasonings: string[];
+  removedEquipment: string[];
+  removedCuisines: string[];
 }
 
 export const useUserPreferences = () => {
@@ -12,6 +18,12 @@ export const useUserPreferences = () => {
     seasonings: [],
     equipment: [],
     cuisines: [],
+    customSeasonings: [],
+    customEquipment: [],
+    customCuisines: [],
+    removedSeasonings: [],
+    removedEquipment: [],
+    removedCuisines: [],
   });
   const [loading, setLoading] = useState(true);
 
@@ -37,6 +49,12 @@ export const useUserPreferences = () => {
         seasonings: data.seasonings || [],
         equipment: data.equipment || [],
         cuisines: data.cuisines || [],
+        customSeasonings: data.custom_seasonings || [],
+        customEquipment: data.custom_equipment || [],
+        customCuisines: data.custom_cuisines || [],
+        removedSeasonings: data.removed_seasonings || [],
+        removedEquipment: data.removed_equipment || [],
+        removedCuisines: data.removed_cuisines || [],
       });
     }
     setLoading(false);
@@ -46,7 +64,7 @@ export const useUserPreferences = () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    const newPreferences = { ...preferences, ...updates };
+    const newPreferences: UserPreferences = { ...preferences, ...updates } as UserPreferences;
     setPreferences(newPreferences);
 
     const { error } = await supabase
@@ -56,6 +74,12 @@ export const useUserPreferences = () => {
         seasonings: newPreferences.seasonings,
         equipment: newPreferences.equipment,
         cuisines: newPreferences.cuisines,
+        custom_seasonings: newPreferences.customSeasonings,
+        custom_equipment: newPreferences.customEquipment,
+        custom_cuisines: newPreferences.customCuisines,
+        removed_seasonings: newPreferences.removedSeasonings,
+        removed_equipment: newPreferences.removedEquipment,
+        removed_cuisines: newPreferences.removedCuisines,
       }, {
         onConflict: 'user_id'
       });

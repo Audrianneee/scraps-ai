@@ -39,14 +39,21 @@ const IngredientInput = ({ onComplete }: IngredientInputProps) => {
 
   useEffect(() => {
     if (!loading && preferences) {
-      // Merge default and saved custom items
-      const allSeasonings = [...new Set([...defaultSeasonings, ...preferences.seasonings])];
-      const allEquipment = [...new Set([...defaultEquipment, ...preferences.equipment])];
+      // Build available lists: defaults + custom - removed
+      const allSeasonings = [...new Set([
+        ...defaultSeasonings,
+        ...(preferences.customSeasonings || [])
+      ])].filter(s => !(preferences.removedSeasonings || []).includes(s));
+
+      const allEquipment = [...new Set([
+        ...defaultEquipment,
+        ...(preferences.customEquipment || [])
+      ])].filter(e => !(preferences.removedEquipment || []).includes(e));
       
       setAvailableSeasonings(allSeasonings);
       setAvailableEquipment(allEquipment);
-      setSelectedSeasonings(preferences.seasonings);
-      setSelectedEquipment(preferences.equipment);
+      setSelectedSeasonings(preferences.seasonings || []);
+      setSelectedEquipment(preferences.equipment || []);
     }
   }, [loading, preferences]);
 
@@ -84,33 +91,55 @@ const IngredientInput = ({ onComplete }: IngredientInputProps) => {
   };
 
   const addCustomSeasoning = () => {
-    if (customSeasoning.trim() && !availableSeasonings.includes(customSeasoning.trim())) {
-      const newSeasonings = [...availableSeasonings, customSeasoning.trim()];
+    const val = customSeasoning.trim();
+    if (val && !availableSeasonings.includes(val)) {
+      const newSeasonings = [...availableSeasonings, val];
       setAvailableSeasonings(newSeasonings);
       setCustomSeasoning("");
+      const newCustom = [...(preferences.customSeasonings || []), val];
+      updatePreferences({ customSeasonings: newCustom });
     }
   };
 
   const addCustomEquipment = () => {
-    if (customEquipment.trim() && !availableEquipment.includes(customEquipment.trim())) {
-      const newEquipment = [...availableEquipment, customEquipment.trim()];
+    const val = customEquipment.trim();
+    if (val && !availableEquipment.includes(val)) {
+      const newEquipment = [...availableEquipment, val];
       setAvailableEquipment(newEquipment);
       setCustomEquipment("");
+      const newCustom = [...(preferences.customEquipment || []), val];
+      updatePreferences({ customEquipment: newCustom });
     }
   };
 
   const removeSeasoning = (seasoning: string) => {
-    const newSeasonings = availableSeasonings.filter(s => s !== seasoning);
-    setAvailableSeasonings(newSeasonings);
-    setSelectedSeasonings(selectedSeasonings.filter(s => s !== seasoning));
-    updatePreferences({ seasonings: selectedSeasonings.filter(s => s !== seasoning) });
+    const newAvail = availableSeasonings.filter(s => s !== seasoning);
+    setAvailableSeasonings(newAvail);
+    const newSelected = selectedSeasonings.filter(s => s !== seasoning);
+    setSelectedSeasonings(newSelected);
+
+    if (defaultSeasonings.includes(seasoning)) {
+      const removed = Array.from(new Set([...(preferences.removedSeasonings || []), seasoning]));
+      updatePreferences({ removedSeasonings: removed, seasonings: newSelected });
+    } else {
+      const newCustom = (preferences.customSeasonings || []).filter(s => s !== seasoning);
+      updatePreferences({ customSeasonings: newCustom, seasonings: newSelected });
+    }
   };
 
   const removeEquipment = (equipment: string) => {
-    const newEquipment = availableEquipment.filter(e => e !== equipment);
-    setAvailableEquipment(newEquipment);
-    setSelectedEquipment(selectedEquipment.filter(e => e !== equipment));
-    updatePreferences({ equipment: selectedEquipment.filter(e => e !== equipment) });
+    const newAvail = availableEquipment.filter(e => e !== equipment);
+    setAvailableEquipment(newAvail);
+    const newSelected = selectedEquipment.filter(e => e !== equipment);
+    setSelectedEquipment(newSelected);
+
+    if (defaultEquipment.includes(equipment)) {
+      const removed = Array.from(new Set([...(preferences.removedEquipment || []), equipment]));
+      updatePreferences({ removedEquipment: removed, equipment: newSelected });
+    } else {
+      const newCustom = (preferences.customEquipment || []).filter(e => e !== equipment);
+      updatePreferences({ customEquipment: newCustom, equipment: newSelected });
+    }
   };
 
   const handleSubmit = () => {

@@ -133,7 +133,7 @@ const RecipeCompletion = () => {
     }, 1500);
   };
 
-  const points = rating > 0 ? calculatePoints(foodWasteSaved) : 0;
+  const points = calculatePoints(foodWasteSaved);
 
   return (
     <div className="min-h-screen bg-background p-6">

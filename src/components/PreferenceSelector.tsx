@@ -31,9 +31,12 @@ const PreferenceSelector = ({ onComplete }: PreferenceSelectorProps) => {
 
   useEffect(() => {
     if (!loading && preferences) {
-      const allCuisines = [...new Set([...defaultCuisines, ...preferences.cuisines])];
+      const allCuisines = [...new Set([
+        ...defaultCuisines,
+        ...(preferences.customCuisines || [])
+      ])].filter(c => !(preferences.removedCuisines || []).includes(c));
       setAvailableCuisines(allCuisines);
-      setSelectedCuisines(preferences.cuisines);
+      setSelectedCuisines(preferences.cuisines || []);
     }
   }, [loading, preferences]);
 
@@ -47,18 +50,29 @@ const PreferenceSelector = ({ onComplete }: PreferenceSelectorProps) => {
   };
 
   const addCustomCuisine = () => {
-    if (customCuisine.trim() && !availableCuisines.includes(customCuisine.trim())) {
-      const newCuisines = [...availableCuisines, customCuisine.trim()];
+    const val = customCuisine.trim();
+    if (val && !availableCuisines.includes(val)) {
+      const newCuisines = [...availableCuisines, val];
       setAvailableCuisines(newCuisines);
       setCustomCuisine("");
+      const newCustom = [...(preferences.customCuisines || []), val];
+      updatePreferences({ customCuisines: newCustom });
     }
   };
 
   const removeCuisine = (cuisine: string) => {
-    const newCuisines = availableCuisines.filter(c => c !== cuisine);
-    setAvailableCuisines(newCuisines);
-    setSelectedCuisines(selectedCuisines.filter(c => c !== cuisine));
-    updatePreferences({ cuisines: selectedCuisines.filter(c => c !== cuisine) });
+    const newAvail = availableCuisines.filter(c => c !== cuisine);
+    setAvailableCuisines(newAvail);
+    const newSelected = selectedCuisines.filter(c => c !== cuisine);
+    setSelectedCuisines(newSelected);
+
+    if (defaultCuisines.includes(cuisine)) {
+      const removed = Array.from(new Set([...(preferences.removedCuisines || []), cuisine]));
+      updatePreferences({ removedCuisines: removed, cuisines: newSelected });
+    } else {
+      const newCustom = (preferences.customCuisines || []).filter(c => c !== cuisine);
+      updatePreferences({ customCuisines: newCustom, cuisines: newSelected });
+    }
   };
 
   const handleSubmit = () => {
