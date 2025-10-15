@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { ChefHat, ArrowLeft, Clock, Flame, MessageSquare, Send } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { ChefHat, ArrowLeft, Clock, Flame, MessageSquare, Send, Check, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -32,10 +33,12 @@ interface Message {
 }
 
 const RecipeDetail = ({ recipeId, onBack }: RecipeDetailProps) => {
+  const navigate = useNavigate();
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentMessage, setCurrentMessage] = useState("");
   const [isLoadingChat, setIsLoadingChat] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -50,6 +53,56 @@ const RecipeDetail = ({ recipeId, onBack }: RecipeDetailProps) => {
       }
     }
   }, [recipeId]);
+
+  const handleSaveRecipe = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to save recipes",
+        variant: "destructive",
+      });
+      navigate("/auth");
+      return;
+    }
+
+    setIsSaving(true);
+
+    const { error } = await supabase.from("saved_recipes").insert([{
+      user_id: user.id,
+      recipe_data: recipe as any,
+    }]);
+
+    setIsSaving(false);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Recipe saved!",
+        description: "You can find it in your profile",
+      });
+    }
+  };
+
+  const handleFinishCooking = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to track your progress",
+        variant: "destructive",
+      });
+      navigate("/auth");
+      return;
+    }
+
+    navigate("/completion", { state: { recipe } });
+  };
 
   const handleSendMessage = async () => {
     if (!currentMessage.trim() || !recipe) return;
@@ -99,14 +152,22 @@ const RecipeDetail = ({ recipeId, onBack }: RecipeDetailProps) => {
   return (
     <div className="min-h-screen py-12 px-6">
       <div className="max-w-4xl mx-auto">
-        <Button
-          variant="ghost"
-          onClick={onBack}
-          className="mb-6 animate-fade-in"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Recipes
-        </Button>
+        <div className="flex items-center justify-between mb-6 animate-fade-in">
+          <Button variant="ghost" onClick={onBack}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Recipes
+          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={handleSaveRecipe} disabled={isSaving}>
+              <Bookmark className="w-4 h-4 mr-2" />
+              Save Recipe
+            </Button>
+            <Button onClick={handleFinishCooking}>
+              <Check className="w-4 h-4 mr-2" />
+              Finish Cooking
+            </Button>
+          </div>
+        </div>
 
         <div className="animate-slide-in">
           {recipe.imageUrl && (

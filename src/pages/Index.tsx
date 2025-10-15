@@ -1,6 +1,8 @@
-import { useState } from "react";
-import { ChefHat, Sparkles, Clock, Flame, UtensilsCrossed } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { ChefHat, Sparkles, Clock, Flame, UtensilsCrossed, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 import heroImage from "@/assets/hero-food.jpg";
 import IngredientInput from "@/components/IngredientInput";
 import PreferenceSelector from "@/components/PreferenceSelector";
@@ -22,6 +24,7 @@ interface Preferences {
 }
 
 const Index = () => {
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState<Step>("welcome");
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [equipment, setEquipment] = useState<string[]>([]);
@@ -32,6 +35,22 @@ const Index = () => {
   });
   const [selectedRecipeId, setSelectedRecipeId] = useState<string | null>(null);
   const [commonSeasonings, setCommonSeasonings] = useState<string[]>([]);
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    // Check auth status
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleGetStarted = () => {
     setCurrentStep("ingredients");
@@ -75,6 +94,18 @@ const Index = () => {
             style={{ backgroundImage: `url(${heroImage})` }}
           />
           <div className="absolute inset-0 bg-white" />
+          
+          {/* Profile Button */}
+          {user && (
+            <Button
+              variant="outline"
+              className="absolute top-6 right-6 z-20"
+              onClick={() => navigate("/profile")}
+            >
+              <User className="w-4 h-4 mr-2" />
+              My Profile
+            </Button>
+          )}
           
           {/* Content */}
           <div className="relative z-10 max-w-4xl mx-auto px-6 text-center animate-fade-in">

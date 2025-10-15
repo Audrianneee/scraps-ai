@@ -14,13 +14,109 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      cooked_recipes: {
+        Row: {
+          created_at: string
+          food_waste_saved: number
+          id: string
+          points_earned: number
+          rating: number | null
+          recipe_data: Json
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          food_waste_saved?: number
+          id?: string
+          points_earned?: number
+          rating?: number | null
+          recipe_data: Json
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          food_waste_saved?: number
+          id?: string
+          points_earned?: number
+          rating?: number | null
+          recipe_data?: Json
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cooked_recipes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          id: string
+          level: number
+          total_points: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          id: string
+          level?: number
+          total_points?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          level?: number
+          total_points?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      saved_recipes: {
+        Row: {
+          created_at: string
+          id: string
+          recipe_data: Json
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          recipe_data: Json
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          recipe_data?: Json
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_recipes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      update_profile_points_and_level: {
+        Args: { points_to_add: number; user_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
