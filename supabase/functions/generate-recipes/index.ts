@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { ingredients, equipment, preferences } = await req.json();
+    const { ingredients, equipment, preferences, commonSeasonings } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
     if (!LOVABLE_API_KEY) {
@@ -26,9 +26,14 @@ serve(async (req) => {
     const systemPrompt = `You are an expert chef who creates delicious, creative recipes from leftover ingredients. 
 Your goal is to minimize food waste while creating amazing meals. Always provide practical, safe cooking advice.`;
 
+    const seasoningsNote = commonSeasonings && commonSeasonings.length > 0
+      ? `Common seasonings available: ${commonSeasonings.join(', ')}`
+      : 'Assume basic seasonings are available';
+
     const userPrompt = `Create 3-5 creative recipe suggestions using these ingredients: ${ingredients.join(', ')}.
 
 Available equipment: ${equipment.join(', ') || 'basic kitchen tools'}
+${seasoningsNote}
 
 Preferences:
 - ${cuisineFilter}

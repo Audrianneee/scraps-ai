@@ -11,8 +11,13 @@ interface Ingredient {
 }
 
 interface IngredientInputProps {
-  onComplete: (ingredients: Ingredient[], equipment: string[]) => void;
+  onComplete: (ingredients: Ingredient[], equipment: string[], seasonings: string[]) => void;
 }
+
+const commonSeasoningsList = [
+  "Salt", "Black Pepper", "Olive Oil", "Vegetable Oil", "Garlic Powder",
+  "Onion Powder", "Paprika", "Cumin", "Oregano", "Basil", "Thyme", "Rosemary"
+];
 
 const commonEquipment = [
   "Oven", "Stovetop", "Microwave", "Air Fryer", "Blender", 
@@ -24,6 +29,7 @@ const IngredientInput = ({ onComplete }: IngredientInputProps) => {
   const [currentIngredient, setCurrentIngredient] = useState("");
   const [currentAmount, setCurrentAmount] = useState("");
   const [selectedEquipment, setSelectedEquipment] = useState<string[]>([]);
+  const [selectedSeasonings, setSelectedSeasonings] = useState<string[]>([]);
 
   const addIngredient = () => {
     if (currentIngredient.trim()) {
@@ -48,9 +54,17 @@ const IngredientInput = ({ onComplete }: IngredientInputProps) => {
     );
   };
 
+  const toggleSeasoning = (seasoning: string) => {
+    setSelectedSeasonings(prev =>
+      prev.includes(seasoning)
+        ? prev.filter(s => s !== seasoning)
+        : [...prev, seasoning]
+    );
+  };
+
   const handleSubmit = () => {
     if (ingredients.length > 0) {
-      onComplete(ingredients, selectedEquipment);
+      onComplete(ingredients, selectedEquipment, selectedSeasonings);
     }
   };
 
@@ -113,6 +127,25 @@ const IngredientInput = ({ onComplete }: IngredientInputProps) => {
                 ))}
               </div>
             )}
+          </div>
+
+          {/* Common Seasonings Section */}
+          <div className="mb-8">
+            <label className="block text-sm font-medium mb-3 text-foreground">
+              Common Seasonings Available
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {commonSeasoningsList.map((seasoning) => (
+                <Badge
+                  key={seasoning}
+                  variant={selectedSeasonings.includes(seasoning) ? "default" : "outline"}
+                  className="cursor-pointer px-3 py-1 transition-all hover:scale-105"
+                  onClick={() => toggleSeasoning(seasoning)}
+                >
+                  {seasoning}
+                </Badge>
+              ))}
+            </div>
           </div>
 
           {/* Equipment Selection */}

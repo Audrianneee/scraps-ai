@@ -3,7 +3,7 @@ import { ChefHat } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Slider } from "@/components/ui/slider";
+import { Input } from "@/components/ui/input";
 
 interface Preferences {
   cuisineType: string[];
@@ -22,6 +22,7 @@ const cuisineTypes = [
 
 const PreferenceSelector = ({ onComplete }: PreferenceSelectorProps) => {
   const [selectedCuisines, setSelectedCuisines] = useState<string[]>([]);
+  const [customCuisine, setCustomCuisine] = useState("");
   const [calorieRange, setCalorieRange] = useState<[number, number]>([0, 1000]);
   const [timeRange, setTimeRange] = useState<[number, number]>([0, 120]);
 
@@ -34,8 +35,12 @@ const PreferenceSelector = ({ onComplete }: PreferenceSelectorProps) => {
   };
 
   const handleSubmit = () => {
+    const allCuisines = [...selectedCuisines];
+    if (customCuisine.trim()) {
+      allCuisines.push(customCuisine.trim());
+    }
     onComplete({
-      cuisineType: selectedCuisines,
+      cuisineType: allCuisines,
       calorieRange,
       timeRange,
     });
@@ -58,7 +63,7 @@ const PreferenceSelector = ({ onComplete }: PreferenceSelectorProps) => {
             <label className="block text-sm font-medium mb-3 text-foreground">
               Cuisine Type (select all that apply)
             </label>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 mb-4">
               {cuisineTypes.map((cuisine) => (
                 <Badge
                   key={cuisine}
@@ -70,43 +75,71 @@ const PreferenceSelector = ({ onComplete }: PreferenceSelectorProps) => {
                 </Badge>
               ))}
             </div>
+            <Input
+              placeholder="Or enter your preferred cuisine type..."
+              value={customCuisine}
+              onChange={(e) => setCustomCuisine(e.target.value)}
+              className="mt-2"
+            />
           </div>
 
           {/* Calorie Range */}
           <div className="mb-8">
             <label className="block text-sm font-medium mb-3 text-foreground">
-              Calorie Range: {calorieRange[0]} - {calorieRange[1]} kcal
+              Calorie Range (kcal)
             </label>
-            <Slider
-              value={calorieRange}
-              onValueChange={(value) => setCalorieRange(value as [number, number])}
-              min={0}
-              max={2000}
-              step={50}
-              className="mb-2"
-            />
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>0 kcal</span>
-              <span>2000 kcal</span>
+            <div className="flex gap-4 items-center">
+              <div className="flex-1">
+                <label className="text-xs text-muted-foreground mb-1 block">Min</label>
+                <Input
+                  type="number"
+                  value={calorieRange[0]}
+                  onChange={(e) => setCalorieRange([parseInt(e.target.value) || 0, calorieRange[1]])}
+                  min={0}
+                  max={calorieRange[1]}
+                />
+              </div>
+              <span className="text-muted-foreground mt-6">to</span>
+              <div className="flex-1">
+                <label className="text-xs text-muted-foreground mb-1 block">Max</label>
+                <Input
+                  type="number"
+                  value={calorieRange[1]}
+                  onChange={(e) => setCalorieRange([calorieRange[0], parseInt(e.target.value) || 1000])}
+                  min={calorieRange[0]}
+                  max={5000}
+                />
+              </div>
             </div>
           </div>
 
           {/* Time Range */}
           <div className="mb-8">
             <label className="block text-sm font-medium mb-3 text-foreground">
-              Preparation Time: {timeRange[0]} - {timeRange[1]} minutes
+              Preparation Time (minutes)
             </label>
-            <Slider
-              value={timeRange}
-              onValueChange={(value) => setTimeRange(value as [number, number])}
-              min={0}
-              max={180}
-              step={5}
-              className="mb-2"
-            />
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>0 min</span>
-              <span>3 hours</span>
+            <div className="flex gap-4 items-center">
+              <div className="flex-1">
+                <label className="text-xs text-muted-foreground mb-1 block">Min</label>
+                <Input
+                  type="number"
+                  value={timeRange[0]}
+                  onChange={(e) => setTimeRange([parseInt(e.target.value) || 0, timeRange[1]])}
+                  min={0}
+                  max={timeRange[1]}
+                />
+              </div>
+              <span className="text-muted-foreground mt-6">to</span>
+              <div className="flex-1">
+                <label className="text-xs text-muted-foreground mb-1 block">Max</label>
+                <Input
+                  type="number"
+                  value={timeRange[1]}
+                  onChange={(e) => setTimeRange([timeRange[0], parseInt(e.target.value) || 120])}
+                  min={timeRange[0]}
+                  max={300}
+                />
+              </div>
             </div>
           </div>
 

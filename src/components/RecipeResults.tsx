@@ -33,6 +33,7 @@ interface RecipeResultsProps {
   ingredients: Ingredient[];
   equipment: string[];
   preferences: Preferences;
+  commonSeasonings: string[];
   onRecipeSelect: (recipeId: string) => void;
   onStartOver: () => void;
 }
@@ -40,7 +41,8 @@ interface RecipeResultsProps {
 const RecipeResults = ({ 
   ingredients, 
   equipment, 
-  preferences, 
+  preferences,
+  commonSeasonings,
   onRecipeSelect,
   onStartOver 
 }: RecipeResultsProps) => {
@@ -60,12 +62,16 @@ const RecipeResults = ({
           ingredients: ingredients.map(i => i.name),
           equipment,
           preferences,
+          commonSeasonings,
         },
       });
 
       if (error) throw error;
 
-      setRecipes(data.recipes || []);
+      const recipesWithIds = data.recipes || [];
+      setRecipes(recipesWithIds);
+      // Store recipes in sessionStorage for RecipeDetail to access
+      sessionStorage.setItem("generatedRecipes", JSON.stringify(recipesWithIds));
     } catch (error: any) {
       console.error("Error generating recipes:", error);
       toast({
