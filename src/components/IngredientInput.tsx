@@ -30,6 +30,10 @@ const IngredientInput = ({ onComplete }: IngredientInputProps) => {
   const [currentAmount, setCurrentAmount] = useState("");
   const [selectedEquipment, setSelectedEquipment] = useState<string[]>([]);
   const [selectedSeasonings, setSelectedSeasonings] = useState<string[]>([]);
+  const [customSeasoning, setCustomSeasoning] = useState("");
+  const [customEquipment, setCustomEquipment] = useState("");
+  const [availableSeasonings, setAvailableSeasonings] = useState<string[]>(commonSeasoningsList);
+  const [availableEquipment, setAvailableEquipment] = useState<string[]>(commonEquipment);
 
   const addIngredient = () => {
     if (currentIngredient.trim()) {
@@ -60,6 +64,20 @@ const IngredientInput = ({ onComplete }: IngredientInputProps) => {
         ? prev.filter(s => s !== seasoning)
         : [...prev, seasoning]
     );
+  };
+
+  const addCustomSeasoning = () => {
+    if (customSeasoning.trim() && !availableSeasonings.includes(customSeasoning.trim())) {
+      setAvailableSeasonings([...availableSeasonings, customSeasoning.trim()]);
+      setCustomSeasoning("");
+    }
+  };
+
+  const addCustomEquipment = () => {
+    if (customEquipment.trim() && !availableEquipment.includes(customEquipment.trim())) {
+      setAvailableEquipment([...availableEquipment, customEquipment.trim()]);
+      setCustomEquipment("");
+    }
   };
 
   const handleSubmit = () => {
@@ -134,8 +152,19 @@ const IngredientInput = ({ onComplete }: IngredientInputProps) => {
             <label className="block text-sm font-medium mb-3 text-foreground">
               Common Seasonings Available
             </label>
+            <div className="flex gap-2 mb-3">
+              <Input
+                placeholder="Add custom seasoning..."
+                value={customSeasoning}
+                onChange={(e) => setCustomSeasoning(e.target.value)}
+                onKeyPress={(e) => e.key === "Enter" && addCustomSeasoning()}
+              />
+              <Button onClick={addCustomSeasoning} size="icon" variant="secondary">
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
             <div className="flex flex-wrap gap-2">
-              {commonSeasoningsList.map((seasoning) => (
+              {availableSeasonings.map((seasoning) => (
                 <Badge
                   key={seasoning}
                   variant={selectedSeasonings.includes(seasoning) ? "default" : "outline"}
@@ -151,8 +180,19 @@ const IngredientInput = ({ onComplete }: IngredientInputProps) => {
           {/* Equipment Selection */}
           <div className="mb-8">
             <label className="block text-sm font-medium mb-3 text-foreground">Available Equipment</label>
+            <div className="flex gap-2 mb-3">
+              <Input
+                placeholder="Add custom equipment..."
+                value={customEquipment}
+                onChange={(e) => setCustomEquipment(e.target.value)}
+                onKeyPress={(e) => e.key === "Enter" && addCustomEquipment()}
+              />
+              <Button onClick={addCustomEquipment} size="icon" variant="secondary">
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
             <div className="flex flex-wrap gap-2">
-              {commonEquipment.map((equip) => (
+              {availableEquipment.map((equip) => (
                 <Badge
                   key={equip}
                   variant={selectedEquipment.includes(equip) ? "default" : "outline"}

@@ -95,17 +95,25 @@ const Index = () => {
           />
           <div className="absolute inset-0 bg-white" />
           
-          {/* Profile Button */}
-          {user && (
-            <Button
-              variant="outline"
-              className="absolute top-6 right-6 z-20"
-              onClick={() => navigate("/profile")}
-            >
-              <User className="w-4 h-4 mr-2" />
-              My Profile
-            </Button>
-          )}
+          {/* Auth Buttons */}
+          <div className="absolute top-6 right-6 z-20 flex gap-2">
+            {user ? (
+              <Button
+                variant="outline"
+                onClick={() => navigate("/profile")}
+              >
+                <User className="w-4 h-4 mr-2" />
+                My Profile
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                onClick={() => navigate("/auth")}
+              >
+                Login / Register
+              </Button>
+            )}
+          </div>
           
           {/* Content */}
           <div className="relative z-10 max-w-4xl mx-auto px-6 text-center animate-fade-in">

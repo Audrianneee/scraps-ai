@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChefHat } from "lucide-react";
+import { ChefHat, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +23,7 @@ const cuisineTypes = [
 const PreferenceSelector = ({ onComplete }: PreferenceSelectorProps) => {
   const [selectedCuisines, setSelectedCuisines] = useState<string[]>([]);
   const [customCuisine, setCustomCuisine] = useState("");
+  const [availableCuisines, setAvailableCuisines] = useState<string[]>(cuisineTypes);
   const [calorieRange, setCalorieRange] = useState<[number, number]>([0, 1000]);
   const [timeRange, setTimeRange] = useState<[number, number]>([0, 120]);
 
@@ -34,13 +35,16 @@ const PreferenceSelector = ({ onComplete }: PreferenceSelectorProps) => {
     );
   };
 
-  const handleSubmit = () => {
-    const allCuisines = [...selectedCuisines];
-    if (customCuisine.trim()) {
-      allCuisines.push(customCuisine.trim());
+  const addCustomCuisine = () => {
+    if (customCuisine.trim() && !availableCuisines.includes(customCuisine.trim())) {
+      setAvailableCuisines([...availableCuisines, customCuisine.trim()]);
+      setCustomCuisine("");
     }
+  };
+
+  const handleSubmit = () => {
     onComplete({
-      cuisineType: allCuisines,
+      cuisineType: selectedCuisines,
       calorieRange,
       timeRange,
     });
@@ -63,8 +67,19 @@ const PreferenceSelector = ({ onComplete }: PreferenceSelectorProps) => {
             <label className="block text-sm font-medium mb-3 text-foreground">
               Cuisine Type (select all that apply)
             </label>
-            <div className="flex flex-wrap gap-2 mb-4">
-              {cuisineTypes.map((cuisine) => (
+            <div className="flex gap-2 mb-3">
+              <Input
+                placeholder="Add custom cuisine type..."
+                value={customCuisine}
+                onChange={(e) => setCustomCuisine(e.target.value)}
+                onKeyPress={(e) => e.key === "Enter" && addCustomCuisine()}
+              />
+              <Button onClick={addCustomCuisine} size="icon" variant="secondary">
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {availableCuisines.map((cuisine) => (
                 <Badge
                   key={cuisine}
                   variant={selectedCuisines.includes(cuisine) ? "default" : "outline"}
@@ -75,12 +90,6 @@ const PreferenceSelector = ({ onComplete }: PreferenceSelectorProps) => {
                 </Badge>
               ))}
             </div>
-            <Input
-              placeholder="Or enter your preferred cuisine type..."
-              value={customCuisine}
-              onChange={(e) => setCustomCuisine(e.target.value)}
-              className="mt-2"
-            />
           </div>
 
           {/* Calorie Range */}
