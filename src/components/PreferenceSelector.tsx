@@ -36,7 +36,8 @@ const PreferenceSelector = ({ onComplete }: PreferenceSelectorProps) => {
         ...(preferences.customCuisines || [])
       ])].filter(c => !(preferences.removedCuisines || []).includes(c));
       setAvailableCuisines(allCuisines);
-      setSelectedCuisines(preferences.cuisines || []);
+      // Don't load selected cuisines from preferences - start fresh each time
+      setSelectedCuisines([]);
     }
   }, [loading, preferences]);
 
@@ -46,7 +47,7 @@ const PreferenceSelector = ({ onComplete }: PreferenceSelectorProps) => {
       : [...selectedCuisines, cuisine];
     
     setSelectedCuisines(newSelection);
-    updatePreferences({ cuisines: newSelection });
+    // Don't save cuisines to preferences - they reset each time
   };
 
   const addCustomCuisine = () => {
@@ -68,10 +69,10 @@ const PreferenceSelector = ({ onComplete }: PreferenceSelectorProps) => {
 
     if (defaultCuisines.includes(cuisine)) {
       const removed = Array.from(new Set([...(preferences.removedCuisines || []), cuisine]));
-      updatePreferences({ removedCuisines: removed, cuisines: newSelected });
+      updatePreferences({ removedCuisines: removed });
     } else {
       const newCustom = (preferences.customCuisines || []).filter(c => c !== cuisine);
-      updatePreferences({ customCuisines: newCustom, cuisines: newSelected });
+      updatePreferences({ customCuisines: newCustom });
     }
   };
 
@@ -146,7 +147,10 @@ const PreferenceSelector = ({ onComplete }: PreferenceSelectorProps) => {
                 <Input
                   type="number"
                   value={calorieRange[0]}
-                  onChange={(e) => setCalorieRange([parseInt(e.target.value) || 0, calorieRange[1]])}
+                  onChange={(e) => {
+                    const val = e.target.value === '' ? '' : parseInt(e.target.value);
+                    setCalorieRange([val === '' ? 0 : val, calorieRange[1]]);
+                  }}
                   min={0}
                   max={calorieRange[1]}
                 />
@@ -157,7 +161,10 @@ const PreferenceSelector = ({ onComplete }: PreferenceSelectorProps) => {
                 <Input
                   type="number"
                   value={calorieRange[1]}
-                  onChange={(e) => setCalorieRange([calorieRange[0], parseInt(e.target.value) || 1000])}
+                  onChange={(e) => {
+                    const val = e.target.value === '' ? '' : parseInt(e.target.value);
+                    setCalorieRange([calorieRange[0], val === '' ? 1000 : val]);
+                  }}
                   min={calorieRange[0]}
                   max={5000}
                 />
@@ -176,7 +183,10 @@ const PreferenceSelector = ({ onComplete }: PreferenceSelectorProps) => {
                 <Input
                   type="number"
                   value={timeRange[0]}
-                  onChange={(e) => setTimeRange([parseInt(e.target.value) || 0, timeRange[1]])}
+                  onChange={(e) => {
+                    const val = e.target.value === '' ? '' : parseInt(e.target.value);
+                    setTimeRange([val === '' ? 0 : val, timeRange[1]]);
+                  }}
                   min={0}
                   max={timeRange[1]}
                 />
@@ -187,7 +197,10 @@ const PreferenceSelector = ({ onComplete }: PreferenceSelectorProps) => {
                 <Input
                   type="number"
                   value={timeRange[1]}
-                  onChange={(e) => setTimeRange([timeRange[0], parseInt(e.target.value) || 120])}
+                  onChange={(e) => {
+                    const val = e.target.value === '' ? '' : parseInt(e.target.value);
+                    setTimeRange([timeRange[0], val === '' ? 120 : val]);
+                  }}
                   min={timeRange[0]}
                   max={300}
                 />
