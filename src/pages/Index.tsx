@@ -163,11 +163,39 @@ const Index = () => {
       )}
 
       {currentStep === "ingredients" && (
-        <IngredientInput onComplete={handleIngredientsComplete} />
+        <div>
+          <div className="absolute top-6 right-6 z-20">
+            {user ? (
+              <Button variant="outline" onClick={() => navigate("/profile")}>
+                <User className="w-4 h-4 mr-2" />
+                My Profile
+              </Button>
+            ) : (
+              <Button variant="outline" onClick={() => navigate("/auth")}>
+                Login / Register
+              </Button>
+            )}
+          </div>
+          <IngredientInput onComplete={handleIngredientsComplete} onBack={() => setCurrentStep("welcome")} />
+        </div>
       )}
 
       {currentStep === "preferences" && (
-        <PreferenceSelector onComplete={handlePreferencesComplete} />
+        <div>
+          <div className="absolute top-6 right-6 z-20">
+            {user ? (
+              <Button variant="outline" onClick={() => navigate("/profile")}>
+                <User className="w-4 h-4 mr-2" />
+                My Profile
+              </Button>
+            ) : (
+              <Button variant="outline" onClick={() => navigate("/auth")}>
+                Login / Register
+              </Button>
+            )}
+          </div>
+          <PreferenceSelector onComplete={handlePreferencesComplete} onBack={() => setCurrentStep("ingredients")} />
+        </div>
       )}
 
       {currentStep === "results" && (

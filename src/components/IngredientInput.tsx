@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, X, ChefHat } from "lucide-react";
+import { Plus, X, ChefHat, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -13,6 +13,7 @@ interface Ingredient {
 
 interface IngredientInputProps {
   onComplete: (ingredients: Ingredient[], equipment: string[], seasonings: string[]) => void;
+  onBack?: () => void;
 }
 
 const defaultSeasonings = [
@@ -25,7 +26,7 @@ const defaultEquipment = [
   "Food Processor", "Slow Cooker", "Instant Pot", "Grill"
 ];
 
-const IngredientInput = ({ onComplete }: IngredientInputProps) => {
+const IngredientInput = ({ onComplete, onBack }: IngredientInputProps) => {
   const { preferences, updatePreferences, loading } = useUserPreferences();
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [currentIngredient, setCurrentIngredient] = useState("");
@@ -151,6 +152,12 @@ const IngredientInput = ({ onComplete }: IngredientInputProps) => {
   return (
     <div className="min-h-screen py-12 px-6">
       <div className="max-w-3xl mx-auto">
+        {onBack && (
+          <Button variant="ghost" onClick={onBack} className="mb-4">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back
+          </Button>
+        )}
         <div className="mb-8 text-center animate-fade-in">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
             <ChefHat className="w-8 h-8 text-primary" />

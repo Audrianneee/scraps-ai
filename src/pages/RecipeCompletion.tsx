@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import confetti from "canvas-confetti";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Star, Trophy, Leaf, Home, ArrowLeft } from "lucide-react";
+import { Star, Trophy, Leaf, Home, ArrowLeft, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -18,8 +18,14 @@ const RecipeCompletion = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
   const [foodWasteSaved, setFoodWasteSaved] = useState(0);
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
+    // Check auth
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
     // Set constant food waste value
     const wasteValue = Math.floor(Math.random() * 500 + 200);
     setFoodWasteSaved(wasteValue);
@@ -138,10 +144,18 @@ const RecipeCompletion = () => {
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-4xl mx-auto space-y-8">
-        <Button variant="ghost" onClick={() => navigate("/")}>
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Home
-        </Button>
+        <div className="flex items-center justify-between">
+          <Button variant="ghost" onClick={() => navigate("/")}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Home
+          </Button>
+          {user && (
+            <Button variant="outline" onClick={() => navigate("/profile")}>
+              <User className="w-4 h-4 mr-2" />
+              My Profile
+            </Button>
+          )}
+        </div>
         
         <div className="text-center space-y-4 animate-fade-in">
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/20 mb-4">

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ChefHat, Plus, X } from "lucide-react";
+import { ChefHat, Plus, X, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +14,7 @@ interface Preferences {
 
 interface PreferenceSelectorProps {
   onComplete: (preferences: Preferences) => void;
+  onBack?: () => void;
 }
 
 const defaultCuisines = [
@@ -21,7 +22,7 @@ const defaultCuisines = [
   "American", "French", "Thai", "Japanese", "Middle Eastern"
 ];
 
-const PreferenceSelector = ({ onComplete }: PreferenceSelectorProps) => {
+const PreferenceSelector = ({ onComplete, onBack }: PreferenceSelectorProps) => {
   const { preferences, updatePreferences, loading } = useUserPreferences();
   const [selectedCuisines, setSelectedCuisines] = useState<string[]>([]);
   const [customCuisine, setCustomCuisine] = useState("");
@@ -87,6 +88,12 @@ const PreferenceSelector = ({ onComplete }: PreferenceSelectorProps) => {
   return (
     <div className="min-h-screen py-12 px-6">
       <div className="max-w-3xl mx-auto">
+        {onBack && (
+          <Button variant="ghost" onClick={onBack} className="mb-4">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back
+          </Button>
+        )}
         <div className="mb-8 text-center animate-fade-in">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
             <ChefHat className="w-8 h-8 text-primary" />
