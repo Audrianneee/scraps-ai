@@ -197,10 +197,10 @@ const IngredientInput = ({ onComplete }: IngredientInputProps) => {
             </div>
             <div className="flex flex-wrap gap-2">
               {availableSeasonings.map((seasoning) => (
-                <div key={seasoning} className="relative group">
+                <div key={seasoning} className="relative">
                   <Badge
                     variant={selectedSeasonings.includes(seasoning) ? "default" : "outline"}
-                    className="cursor-pointer px-3 py-1 transition-all hover:scale-105 pr-8"
+                    className="cursor-pointer px-3 py-1 transition-all hover:scale-105 pr-7"
                     onClick={() => toggleSeasoning(seasoning)}
                   >
                     {seasoning}
@@ -210,7 +210,7 @@ const IngredientInput = ({ onComplete }: IngredientInputProps) => {
                       e.stopPropagation();
                       removeSeasoning(seasoning);
                     }}
-                    className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute top-1/2 -translate-y-1/2 right-1 w-4 h-4 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center hover:scale-110 transition-transform"
                   >
                     <X className="w-3 h-3" />
                   </button>
@@ -235,10 +235,10 @@ const IngredientInput = ({ onComplete }: IngredientInputProps) => {
             </div>
             <div className="flex flex-wrap gap-2">
               {availableEquipment.map((equip) => (
-                <div key={equip} className="relative group">
+                <div key={equip} className="relative">
                   <Badge
                     variant={selectedEquipment.includes(equip) ? "default" : "outline"}
-                    className="cursor-pointer px-4 py-2 transition-all hover:scale-105 pr-8"
+                    className="cursor-pointer px-4 py-2 transition-all hover:scale-105 pr-7"
                     onClick={() => toggleEquipment(equip)}
                   >
                     {equip}
@@ -248,7 +248,7 @@ const IngredientInput = ({ onComplete }: IngredientInputProps) => {
                       e.stopPropagation();
                       removeEquipment(equip);
                     }}
-                    className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute top-1/2 -translate-y-1/2 right-1 w-4 h-4 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center hover:scale-110 transition-transform"
                   >
                     <X className="w-3 h-3" />
                   </button>

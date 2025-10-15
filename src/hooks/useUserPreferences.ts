@@ -56,6 +56,8 @@ export const useUserPreferences = () => {
         seasonings: newPreferences.seasonings,
         equipment: newPreferences.equipment,
         cuisines: newPreferences.cuisines,
+      }, {
+        onConflict: 'user_id'
       });
 
     if (error) {

@@ -99,10 +99,10 @@ const PreferenceSelector = ({ onComplete }: PreferenceSelectorProps) => {
             </div>
             <div className="flex flex-wrap gap-2">
               {availableCuisines.map((cuisine) => (
-                <div key={cuisine} className="relative group">
+                <div key={cuisine} className="relative">
                   <Badge
                     variant={selectedCuisines.includes(cuisine) ? "default" : "outline"}
-                    className="cursor-pointer px-4 py-2 transition-all hover:scale-105 pr-8"
+                    className="cursor-pointer px-4 py-2 transition-all hover:scale-105 pr-7"
                     onClick={() => toggleCuisine(cuisine)}
                   >
                     {cuisine}
@@ -112,7 +112,7 @@ const PreferenceSelector = ({ onComplete }: PreferenceSelectorProps) => {
                       e.stopPropagation();
                       removeCuisine(cuisine);
                     }}
-                    className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute top-1/2 -translate-y-1/2 right-1 w-4 h-4 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center hover:scale-110 transition-transform"
                   >
                     <X className="w-3 h-3" />
                   </button>

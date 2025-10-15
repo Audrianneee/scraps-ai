@@ -64,10 +64,9 @@ const RecipeCompletion = () => {
     if (data) setLeaderboard(data);
   };
 
-  const calculatePoints = (rating: number, foodWaste: number) => {
-    // Rating bonus: 10 points per star
-    // Food waste: 1 point per 10 grams
-    return (rating * 10) + Math.floor(foodWaste / 10);
+  const calculatePoints = (foodWaste: number) => {
+    // 1 point per 10 grams, rounded to nearest integer
+    return Math.round(foodWaste / 10);
   };
 
   const handleSubmit = async () => {
@@ -88,7 +87,7 @@ const RecipeCompletion = () => {
       return;
     }
 
-    const pointsEarned = calculatePoints(rating, foodWasteSaved);
+    const pointsEarned = calculatePoints(foodWasteSaved);
 
     // Insert cooked recipe
     const { error: cookedError } = await supabase
@@ -134,7 +133,7 @@ const RecipeCompletion = () => {
     }, 1500);
   };
 
-  const points = rating > 0 ? calculatePoints(rating, foodWasteSaved) : 0;
+  const points = rating > 0 ? calculatePoints(foodWasteSaved) : 0;
 
   return (
     <div className="min-h-screen bg-background p-6">
