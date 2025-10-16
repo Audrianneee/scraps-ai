@@ -19,45 +19,67 @@ const RecipeCompletion = () => {
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
   const [foodWasteSaved, setFoodWasteSaved] = useState(0);
   const [user, setUser] = useState<any>(null);
+  const [pointsAdded, setPointsAdded] = useState(false);
 
   useEffect(() => {
-    // Check auth
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-    });
+    const initializeCompletion = async () => {
+      // Check auth
+      const { data: { session } } = await supabase.auth.getSession();
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
 
-    // Set constant food waste value
-    const wasteValue = Math.floor(Math.random() * 500 + 200);
-    setFoodWasteSaved(wasteValue);
+      // Set constant food waste value
+      const wasteValue = Math.floor(Math.random() * 500 + 200);
+      setFoodWasteSaved(wasteValue);
 
-    // Trigger confetti
-    const duration = 3 * 1000;
-    const end = Date.now() + duration;
+      // Add points immediately if user is logged in
+      if (currentUser && !pointsAdded) {
+        const pointsEarned = calculatePoints(wasteValue);
+        
+        const { error: pointsError } = await supabase.rpc(
+          "update_profile_points_and_level",
+          {
+            user_id: currentUser.id,
+            points_to_add: pointsEarned,
+          }
+        );
 
-    const frame = () => {
-      confetti({
-        particleCount: 2,
-        angle: 60,
-        spread: 55,
-        origin: { x: 0 },
-        colors: ["#FF6B6B", "#4ECDC4", "#45B7D1"],
-      });
-      confetti({
-        particleCount: 2,
-        angle: 120,
-        spread: 55,
-        origin: { x: 1 },
-        colors: ["#FF6B6B", "#4ECDC4", "#45B7D1"],
-      });
-
-      if (Date.now() < end) {
-        requestAnimationFrame(frame);
+        if (!pointsError) {
+          setPointsAdded(true);
+        }
       }
-    };
-    frame();
 
-    // Fetch leaderboard
-    fetchLeaderboard();
+      // Trigger confetti
+      const duration = 3 * 1000;
+      const end = Date.now() + duration;
+
+      const frame = () => {
+        confetti({
+          particleCount: 2,
+          angle: 60,
+          spread: 55,
+          origin: { x: 0 },
+          colors: ["#FF6B6B", "#4ECDC4", "#45B7D1"],
+        });
+        confetti({
+          particleCount: 2,
+          angle: 120,
+          spread: 55,
+          origin: { x: 1 },
+          colors: ["#FF6B6B", "#4ECDC4", "#45B7D1"],
+        });
+
+        if (Date.now() < end) {
+          requestAnimationFrame(frame);
+        }
+      };
+      frame();
+
+      // Fetch leaderboard after adding points
+      await fetchLeaderboard();
+    };
+
+    initializeCompletion();
   }, []);
 
   const fetchLeaderboard = async () => {
@@ -95,7 +117,7 @@ const RecipeCompletion = () => {
 
     const pointsEarned = calculatePoints(foodWasteSaved);
 
-    // Insert cooked recipe
+    // Insert cooked recipe (points already added on page load)
     const { error: cookedError } = await supabase
       .from("cooked_recipes")
       .insert({
@@ -114,19 +136,6 @@ const RecipeCompletion = () => {
       });
       setIsSubmitting(false);
       return;
-    }
-
-    // Update profile points
-    const { error: pointsError } = await supabase.rpc(
-      "update_profile_points_and_level",
-      {
-        user_id: user.id,
-        points_to_add: pointsEarned,
-      }
-    );
-
-    if (pointsError) {
-      console.error("Error updating points:", pointsError);
     }
 
     toast({
