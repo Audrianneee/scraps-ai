@@ -4,7 +4,6 @@ import { ChefHat, Sparkles, Clock, Flame, UtensilsCrossed, User } from "lucide-r
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import heroImage from "@/assets/hero-food.jpg";
-import wasteChefMascot from "@/assets/waste-chef-mascot.png";
 import IngredientInput from "@/components/IngredientInput";
 import PreferenceSelector from "@/components/PreferenceSelector";
 import RecipeResults from "@/components/RecipeResults";
@@ -118,25 +117,17 @@ const Index = () => {
           
           {/* Content */}
           <div className="relative z-10 max-w-4xl mx-auto px-6 text-center animate-fade-in">
-            <div className="flex justify-center mb-6">
-              <img 
-                src={wasteChefMascot} 
-                alt="Scraps the Waste Chef - Your friendly food waste superhero" 
-                className="w-64 h-auto object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-300"
-              />
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/20 mb-6">
+              <ChefHat className="w-10 h-10 text-primary" />
             </div>
             
             <h1 className="text-5xl md:text-7xl font-bold mb-6 text-foreground">
               Scraps.AI
             </h1>
             
-            <p className="text-xl md:text-2xl text-muted-foreground mb-6 max-w-2xl mx-auto">
+            <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto">
               Transform your leftover ingredients into delicious, creative recipes tailored just for you.
               Eliminate food waste while discovering amazing meals.
-            </p>
-            
-            <p className="text-lg text-muted-foreground italic mb-8">
-              Meet Scraps, your friendly waste chef! 👨‍🍳
             </p>
             
             <div className="flex flex-wrap justify-center gap-8 mb-12">
