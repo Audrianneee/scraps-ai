@@ -36,7 +36,7 @@ interface RecipeResultsProps {
   preferences: Preferences;
   commonSeasonings: string[];
   onRecipeSelect: (recipeId: string) => void;
-  onStartOver: () => void;
+  onBack: () => void;
 }
 
 const RecipeResults = ({ 
@@ -45,7 +45,7 @@ const RecipeResults = ({
   preferences,
   commonSeasonings,
   onRecipeSelect,
-  onStartOver 
+  onBack 
 }: RecipeResultsProps) => {
   const navigate = useNavigate();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
@@ -160,15 +160,10 @@ const RecipeResults = ({
           <p className="text-muted-foreground text-lg mb-4">
             We found {recipes.length} delicious recipes for you
           </p>
-          <div className="flex gap-2 justify-center">
-            <Button variant="outline" onClick={onStartOver}>
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
-            </Button>
-            <Button variant="outline" onClick={onStartOver}>
-              Start Over
-            </Button>
-          </div>
+          <Button variant="outline" onClick={onBack}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Preferences
+          </Button>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -249,8 +244,8 @@ const RecipeResults = ({
             <p className="text-xl text-muted-foreground mb-4">
               No recipes found with your current criteria
             </p>
-            <Button onClick={onStartOver} variant="hero">
-              Try Different Ingredients
+            <Button onClick={onBack} variant="hero">
+              Back to Preferences
             </Button>
           </div>
         )}

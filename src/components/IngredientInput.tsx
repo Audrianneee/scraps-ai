@@ -14,6 +14,9 @@ interface Ingredient {
 interface IngredientInputProps {
   onComplete: (ingredients: Ingredient[], equipment: string[], seasonings: string[]) => void;
   onBack?: () => void;
+  initialIngredients?: Ingredient[];
+  initialEquipment?: string[];
+  initialSeasonings?: string[];
 }
 
 const defaultSeasonings = [
@@ -26,9 +29,9 @@ const defaultEquipment = [
   "Food Processor", "Slow Cooker", "Instant Pot", "Grill"
 ];
 
-const IngredientInput = ({ onComplete, onBack }: IngredientInputProps) => {
+const IngredientInput = ({ onComplete, onBack, initialIngredients = [], initialEquipment = [], initialSeasonings = [] }: IngredientInputProps) => {
   const { preferences, updatePreferences, loading } = useUserPreferences();
-  const [ingredients, setIngredients] = useState<Ingredient[]>([]);
+  const [ingredients, setIngredients] = useState<Ingredient[]>(initialIngredients);
   const [currentIngredient, setCurrentIngredient] = useState("");
   const [currentAmount, setCurrentAmount] = useState("");
   const [selectedEquipment, setSelectedEquipment] = useState<string[]>([]);
@@ -53,8 +56,9 @@ const IngredientInput = ({ onComplete, onBack }: IngredientInputProps) => {
       
       setAvailableSeasonings(allSeasonings);
       setAvailableEquipment(allEquipment);
-      setSelectedSeasonings(preferences.seasonings || []);
-      setSelectedEquipment(preferences.equipment || []);
+      // Use initial values if provided, otherwise use preferences
+      setSelectedSeasonings(initialSeasonings.length > 0 ? initialSeasonings : (preferences.seasonings || []));
+      setSelectedEquipment(initialEquipment.length > 0 ? initialEquipment : (preferences.equipment || []));
     }
   }, [loading, preferences]);
 

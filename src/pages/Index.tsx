@@ -26,15 +26,24 @@ interface Preferences {
 const Index = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState<Step>("welcome");
-  const [ingredients, setIngredients] = useState<Ingredient[]>([]);
-  const [equipment, setEquipment] = useState<string[]>([]);
+  const [ingredients, setIngredients] = useState<Ingredient[]>(() => {
+    const saved = sessionStorage.getItem("ingredients");
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [equipment, setEquipment] = useState<string[]>(() => {
+    const saved = sessionStorage.getItem("equipment");
+    return saved ? JSON.parse(saved) : [];
+  });
   const [preferences, setPreferences] = useState<Preferences>({
     cuisineType: [],
     calorieRange: [0, 1000],
     timeRange: [0, 120],
   });
   const [selectedRecipeId, setSelectedRecipeId] = useState<string | null>(null);
-  const [commonSeasonings, setCommonSeasonings] = useState<string[]>([]);
+  const [commonSeasonings, setCommonSeasonings] = useState<string[]>(() => {
+    const saved = sessionStorage.getItem("commonSeasonings");
+    return saved ? JSON.parse(saved) : [];
+  });
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
@@ -60,6 +69,10 @@ const Index = () => {
     setIngredients(ings);
     setEquipment(equip);
     setCommonSeasonings(seasonings);
+    // Save to sessionStorage
+    sessionStorage.setItem("ingredients", JSON.stringify(ings));
+    sessionStorage.setItem("equipment", JSON.stringify(equip));
+    sessionStorage.setItem("commonSeasonings", JSON.stringify(seasonings));
     setCurrentStep("preferences");
   };
 
@@ -79,9 +92,19 @@ const Index = () => {
 
   const handleStartOver = () => {
     setCurrentStep("ingredients");
+    // Don't clear ingredients when using Start Over button
+    setSelectedRecipeId(null);
+  };
+
+  const handleRecipeComplete = () => {
+    // Clear ingredients only after recipe completion
     setIngredients([]);
     setEquipment([]);
-    setSelectedRecipeId(null);
+    setCommonSeasonings([]);
+    sessionStorage.removeItem("ingredients");
+    sessionStorage.removeItem("equipment");
+    sessionStorage.removeItem("commonSeasonings");
+    setCurrentStep("welcome");
   };
 
   return (
@@ -176,7 +199,13 @@ const Index = () => {
               </Button>
             )}
           </div>
-          <IngredientInput onComplete={handleIngredientsComplete} onBack={() => setCurrentStep("welcome")} />
+          <IngredientInput 
+            onComplete={handleIngredientsComplete} 
+            onBack={() => setCurrentStep("welcome")}
+            initialIngredients={ingredients}
+            initialEquipment={equipment}
+            initialSeasonings={commonSeasonings}
+          />
         </div>
       )}
 
@@ -205,7 +234,7 @@ const Index = () => {
           preferences={preferences}
           commonSeasonings={commonSeasonings}
           onRecipeSelect={handleRecipeSelect}
-          onStartOver={handleStartOver}
+          onBack={() => setCurrentStep("preferences")}
         />
       )}
 
