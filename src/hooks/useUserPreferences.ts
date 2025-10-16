@@ -11,6 +11,8 @@ export interface UserPreferences {
   removedSeasonings: string[];
   removedEquipment: string[];
   removedCuisines: string[];
+  customDietaryRestrictions: string[];
+  removedDietaryRestrictions: string[];
 }
 
 export const useUserPreferences = () => {
@@ -24,6 +26,8 @@ export const useUserPreferences = () => {
     removedSeasonings: [],
     removedEquipment: [],
     removedCuisines: [],
+    customDietaryRestrictions: [],
+    removedDietaryRestrictions: [],
   });
   const [loading, setLoading] = useState(true);
 
@@ -55,6 +59,8 @@ export const useUserPreferences = () => {
         removedSeasonings: data.removed_seasonings || [],
         removedEquipment: data.removed_equipment || [],
         removedCuisines: data.removed_cuisines || [],
+        customDietaryRestrictions: data.custom_dietary_restrictions || [],
+        removedDietaryRestrictions: data.removed_dietary_restrictions || [],
       });
     }
     setLoading(false);
@@ -80,6 +86,8 @@ export const useUserPreferences = () => {
         removed_seasonings: newPreferences.removedSeasonings,
         removed_equipment: newPreferences.removedEquipment,
         removed_cuisines: newPreferences.removedCuisines,
+        custom_dietary_restrictions: newPreferences.customDietaryRestrictions,
+        removed_dietary_restrictions: newPreferences.removedDietaryRestrictions,
       }, {
         onConflict: 'user_id'
       });

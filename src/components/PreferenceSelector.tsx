@@ -36,6 +36,8 @@ const PreferenceSelector = ({ onComplete, onBack }: PreferenceSelectorProps) => 
   const [calorieRange, setCalorieRange] = useState<[number, number]>([0, 1000]);
   const [timeRange, setTimeRange] = useState<[number, number]>([0, 120]);
   const [selectedDietaryRestrictions, setSelectedDietaryRestrictions] = useState<string[]>([]);
+  const [customRestriction, setCustomRestriction] = useState("");
+  const [availableRestrictions, setAvailableRestrictions] = useState<string[]>(defaultDietaryRestrictions);
 
   useEffect(() => {
     if (!loading && preferences) {
@@ -44,8 +46,16 @@ const PreferenceSelector = ({ onComplete, onBack }: PreferenceSelectorProps) => 
         ...(preferences.customCuisines || [])
       ])].filter(c => !(preferences.removedCuisines || []).includes(c));
       setAvailableCuisines(allCuisines);
-      // Don't load selected cuisines from preferences - start fresh each time
+      
+      const allRestrictions = [...new Set([
+        ...defaultDietaryRestrictions,
+        ...(preferences.customDietaryRestrictions || [])
+      ])].filter(r => !(preferences.removedDietaryRestrictions || []).includes(r));
+      setAvailableRestrictions(allRestrictions);
+      
+      // Don't load selected cuisines/restrictions from preferences - start fresh each time
       setSelectedCuisines([]);
+      setSelectedDietaryRestrictions([]);
     }
   }, [loading, preferences]);
 
@@ -90,6 +100,32 @@ const PreferenceSelector = ({ onComplete, onBack }: PreferenceSelectorProps) => 
         ? prev.filter(r => r !== restriction)
         : [...prev, restriction]
     );
+  };
+
+  const addCustomRestriction = () => {
+    const val = customRestriction.trim();
+    if (val && !availableRestrictions.includes(val)) {
+      const newRestrictions = [...availableRestrictions, val];
+      setAvailableRestrictions(newRestrictions);
+      setCustomRestriction("");
+      const newCustom = [...(preferences.customDietaryRestrictions || []), val];
+      updatePreferences({ customDietaryRestrictions: newCustom });
+    }
+  };
+
+  const removeRestriction = (restriction: string) => {
+    const newAvail = availableRestrictions.filter(r => r !== restriction);
+    setAvailableRestrictions(newAvail);
+    const newSelected = selectedDietaryRestrictions.filter(r => r !== restriction);
+    setSelectedDietaryRestrictions(newSelected);
+
+    if (defaultDietaryRestrictions.includes(restriction)) {
+      const removed = Array.from(new Set([...(preferences.removedDietaryRestrictions || []), restriction]));
+      updatePreferences({ removedDietaryRestrictions: removed });
+    } else {
+      const newCustom = (preferences.customDietaryRestrictions || []).filter(r => r !== restriction);
+      updatePreferences({ customDietaryRestrictions: newCustom });
+    }
   };
 
   const handleSubmit = () => {
@@ -236,16 +272,37 @@ const PreferenceSelector = ({ onComplete, onBack }: PreferenceSelectorProps) => 
             <label className="block text-sm font-medium mb-3 text-foreground">
               Dietary Restrictions (optional)
             </label>
+            <div className="flex gap-2 mb-3">
+              <Input
+                placeholder="Add custom dietary restriction..."
+                value={customRestriction}
+                onChange={(e) => setCustomRestriction(e.target.value)}
+                onKeyPress={(e) => e.key === "Enter" && addCustomRestriction()}
+              />
+              <Button onClick={addCustomRestriction} size="icon" variant="secondary">
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
             <div className="flex flex-wrap gap-2">
-              {defaultDietaryRestrictions.map((restriction) => (
-                <Badge
-                  key={restriction}
-                  variant={selectedDietaryRestrictions.includes(restriction) ? "default" : "outline"}
-                  className="cursor-pointer px-4 py-2 transition-all hover:scale-105"
-                  onClick={() => toggleDietaryRestriction(restriction)}
-                >
-                  {restriction}
-                </Badge>
+              {availableRestrictions.map((restriction) => (
+                <div key={restriction} className="relative">
+                  <Badge
+                    variant={selectedDietaryRestrictions.includes(restriction) ? "default" : "outline"}
+                    className="cursor-pointer px-4 py-2 transition-all hover:scale-105 pr-7"
+                    onClick={() => toggleDietaryRestriction(restriction)}
+                  >
+                    {restriction}
+                  </Badge>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeRestriction(restriction);
+                    }}
+                    className="absolute top-1/2 -translate-y-1/2 right-1 w-4 h-4 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center hover:scale-110 transition-transform"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
               ))}
             </div>
           </div>
