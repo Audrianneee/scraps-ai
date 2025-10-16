@@ -169,8 +169,8 @@ const PreferenceSelector = ({ onComplete, onBack }: PreferenceSelectorProps) => 
                   type="number"
                   value={calorieRange[1]}
                   onChange={(e) => {
-                    const val = e.target.value === '' ? '' : parseInt(e.target.value);
-                    setCalorieRange([calorieRange[0], val === '' ? 1000 : val]);
+                    const val = e.target.value === '' ? 0 : parseInt(e.target.value);
+                    setCalorieRange([calorieRange[0], val]);
                   }}
                   min={calorieRange[0]}
                   max={5000}
@@ -205,8 +205,8 @@ const PreferenceSelector = ({ onComplete, onBack }: PreferenceSelectorProps) => 
                   type="number"
                   value={timeRange[1]}
                   onChange={(e) => {
-                    const val = e.target.value === '' ? '' : parseInt(e.target.value);
-                    setTimeRange([timeRange[0], val === '' ? 120 : val]);
+                    const val = e.target.value === '' ? 0 : parseInt(e.target.value);
+                    setTimeRange([timeRange[0], val]);
                   }}
                   min={timeRange[0]}
                   max={300}
