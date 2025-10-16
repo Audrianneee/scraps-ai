@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { ingredients, equipment, preferences, commonSeasonings } = await req.json();
+    const { ingredients, equipment, preferences, commonSeasonings, existingRecipes } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
     if (!LOVABLE_API_KEY) {
@@ -23,14 +23,32 @@ serve(async (req) => {
       ? `Focus on these cuisine types: ${preferences.cuisineType.join(', ')}.` 
       : 'Any cuisine type is acceptable.';
 
-    const systemPrompt = `You are an expert chef who creates delicious, creative recipes from leftover ingredients. 
-Your goal is to minimize food waste while creating amazing meals. Always provide practical, safe cooking advice.`;
+    const systemPrompt = `You are an expert chef specializing in creative leftover recipes and food waste reduction. 
+Your mission is to transform leftover ingredients into delicious, restaurant-quality meals.
+
+Core Principles:
+- Maximize use of all provided ingredients, especially leftovers
+- Create recipes that breathe new life into day-old or leftover foods
+- Suggest creative flavor combinations that mask "leftover taste"
+- Provide tips for reviving textures (crispy, fresh, tender)
+- Focus on practical, achievable recipes for home cooks
+- Ensure food safety when working with leftovers
+
+Always prioritize creativity and flavor while minimizing waste.`;
 
     const seasoningsNote = commonSeasonings && commonSeasonings.length > 0
       ? `Common seasonings available: ${commonSeasonings.join(', ')}`
       : 'Assume basic seasonings are available';
 
-    const userPrompt = `Create 3-5 creative recipe suggestions using these ingredients: ${ingredients.join(', ')}.
+    const existingRecipesNote = existingRecipes && existingRecipes.length > 0
+      ? `\nIMPORTANT: Avoid creating recipes similar to these already shown recipes: ${existingRecipes.map((r: any) => r.title).join(', ')}. 
+Create completely different dishes with unique cooking methods and flavor profiles.`
+      : '';
+
+    const userPrompt = `Create 3-5 creative recipe suggestions using these leftover ingredients and items: ${ingredients.join(', ')}.
+
+IMPORTANT: Treat these as leftover or surplus ingredients that need to be used creatively. 
+Focus on recipes that transform leftovers into exciting new dishes.${existingRecipesNote}
 
 Available equipment: ${equipment.join(', ') || 'basic kitchen tools'}
 ${seasoningsNote}

@@ -90,18 +90,33 @@ const RecipeResults = ({
   const loadMoreRecipes = async () => {
     setLoadingMore(true);
     try {
+      // Get existing recipe titles to avoid duplicates
+      const existingTitles = recipes.map(r => r.title.toLowerCase());
+      
       const { data, error } = await supabase.functions.invoke("generate-recipes", {
         body: {
           ingredients: ingredients.map(i => i.name),
           equipment,
           preferences,
           commonSeasonings,
+          existingRecipes: recipes.map(r => ({ id: r.id, title: r.title })),
         },
       });
 
       if (error) throw error;
 
-      const newRecipes = data.recipes || [];
+      const newRecipes = (data.recipes || []).filter((recipe: Recipe) => 
+        !existingTitles.includes(recipe.title.toLowerCase())
+      );
+      
+      if (newRecipes.length === 0) {
+        toast({
+          title: "No new recipes",
+          description: "All available recipe variations have been shown",
+        });
+        return;
+      }
+      
       const updatedRecipes = [...recipes, ...newRecipes];
       setRecipes(updatedRecipes);
       // Update sessionStorage with all recipes

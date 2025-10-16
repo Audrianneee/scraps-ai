@@ -169,7 +169,7 @@ const IngredientInput = ({ onComplete, onBack }: IngredientInputProps) => {
         <Card className="p-8 shadow-card bg-gradient-card animate-slide-in">
           {/* Ingredient Input */}
           <div className="mb-8">
-            <label className="block text-sm font-medium mb-3 text-foreground">Add Ingredients</label>
+            <label className="block text-sm font-medium mb-3 text-foreground">Add Ingredients and Leftovers</label>
             <div className="flex gap-2 mb-4">
               <Input
                 placeholder="Ingredient name (e.g., chicken, tomatoes)"
