@@ -116,11 +116,13 @@ export type Database = {
           created_at: string
           cuisines: string[] | null
           custom_cuisines: string[]
+          custom_dietary_restrictions: string[] | null
           custom_equipment: string[]
           custom_seasonings: string[]
           equipment: string[] | null
           id: string
           removed_cuisines: string[]
+          removed_dietary_restrictions: string[] | null
           removed_equipment: string[]
           removed_seasonings: string[]
           seasonings: string[] | null
@@ -131,11 +133,13 @@ export type Database = {
           created_at?: string
           cuisines?: string[] | null
           custom_cuisines?: string[]
+          custom_dietary_restrictions?: string[] | null
           custom_equipment?: string[]
           custom_seasonings?: string[]
           equipment?: string[] | null
           id?: string
           removed_cuisines?: string[]
+          removed_dietary_restrictions?: string[] | null
           removed_equipment?: string[]
           removed_seasonings?: string[]
           seasonings?: string[] | null
@@ -146,11 +150,13 @@ export type Database = {
           created_at?: string
           cuisines?: string[] | null
           custom_cuisines?: string[]
+          custom_dietary_restrictions?: string[] | null
           custom_equipment?: string[]
           custom_seasonings?: string[]
           equipment?: string[] | null
           id?: string
           removed_cuisines?: string[]
+          removed_dietary_restrictions?: string[] | null
           removed_equipment?: string[]
           removed_seasonings?: string[]
           seasonings?: string[] | null
