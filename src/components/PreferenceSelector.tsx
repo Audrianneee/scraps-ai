@@ -10,6 +10,7 @@ interface Preferences {
   cuisineType: string[];
   calorieRange: [number, number];
   timeRange: [number, number];
+  dietaryRestrictions: string[];
 }
 
 interface PreferenceSelectorProps {
@@ -22,6 +23,11 @@ const defaultCuisines = [
   "American", "French", "Thai", "Japanese", "Middle Eastern"
 ];
 
+const defaultDietaryRestrictions = [
+  "Vegetarian", "Vegan", "Gluten-Free", "Dairy-Free", 
+  "Nut-Free", "Keto", "Paleo", "Low-Carb", "Halal", "Kosher"
+];
+
 const PreferenceSelector = ({ onComplete, onBack }: PreferenceSelectorProps) => {
   const { preferences, updatePreferences, loading } = useUserPreferences();
   const [selectedCuisines, setSelectedCuisines] = useState<string[]>([]);
@@ -29,6 +35,7 @@ const PreferenceSelector = ({ onComplete, onBack }: PreferenceSelectorProps) => 
   const [availableCuisines, setAvailableCuisines] = useState<string[]>(defaultCuisines);
   const [calorieRange, setCalorieRange] = useState<[number, number]>([0, 1000]);
   const [timeRange, setTimeRange] = useState<[number, number]>([0, 120]);
+  const [selectedDietaryRestrictions, setSelectedDietaryRestrictions] = useState<string[]>([]);
 
   useEffect(() => {
     if (!loading && preferences) {
@@ -77,11 +84,20 @@ const PreferenceSelector = ({ onComplete, onBack }: PreferenceSelectorProps) => 
     }
   };
 
+  const toggleDietaryRestriction = (restriction: string) => {
+    setSelectedDietaryRestrictions(prev =>
+      prev.includes(restriction)
+        ? prev.filter(r => r !== restriction)
+        : [...prev, restriction]
+    );
+  };
+
   const handleSubmit = () => {
     onComplete({
       cuisineType: selectedCuisines,
       calorieRange,
       timeRange,
+      dietaryRestrictions: selectedDietaryRestrictions,
     });
   };
 
@@ -212,6 +228,25 @@ const PreferenceSelector = ({ onComplete, onBack }: PreferenceSelectorProps) => 
                   max={300}
                 />
               </div>
+            </div>
+          </div>
+
+          {/* Dietary Restrictions */}
+          <div className="mb-8">
+            <label className="block text-sm font-medium mb-3 text-foreground">
+              Dietary Restrictions (optional)
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {defaultDietaryRestrictions.map((restriction) => (
+                <Badge
+                  key={restriction}
+                  variant={selectedDietaryRestrictions.includes(restriction) ? "default" : "outline"}
+                  className="cursor-pointer px-4 py-2 transition-all hover:scale-105"
+                  onClick={() => toggleDietaryRestriction(restriction)}
+                >
+                  {restriction}
+                </Badge>
+              ))}
             </div>
           </div>
 
