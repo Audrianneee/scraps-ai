@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { ChefHat, Clock, Flame, UtensilsCrossed, Loader2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { ChefHat, Clock, Flame, UtensilsCrossed, Loader2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -46,6 +47,7 @@ const RecipeResults = ({
   onRecipeSelect,
   onStartOver 
 }: RecipeResultsProps) => {
+  const navigate = useNavigate();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -143,9 +145,15 @@ const RecipeResults = ({
           <p className="text-muted-foreground text-lg mb-4">
             We found {recipes.length} delicious recipes for you
           </p>
-          <Button variant="outline" onClick={onStartOver}>
-            Start Over
-          </Button>
+          <div className="flex gap-2 justify-center">
+            <Button variant="outline" onClick={() => navigate(-1)}>
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back
+            </Button>
+            <Button variant="outline" onClick={onStartOver}>
+              Start Over
+            </Button>
+          </div>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
