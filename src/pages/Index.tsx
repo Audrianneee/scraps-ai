@@ -93,7 +93,7 @@ const Index = () => {
             className="absolute inset-0 bg-cover bg-center opacity-30"
             style={{ backgroundImage: `url(${heroImage})` }}
           />
-          <div className="absolute inset-0 bg-background/80" />
+          <div className="absolute inset-0 bg-background/60" />
           
           {/* Auth Buttons */}
           <div className="absolute top-6 right-6 z-20 flex gap-2">
