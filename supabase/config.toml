@@ -1,7 +1,1 @@
-project_id = "zncbbomwrglmfygozvbf"
-
-[functions.generate-recipes]
-verify_jwt = true
-
-[functions.recipe-chat]
-verify_jwt = true
+project_id = "tikpwqoqiyiqubknkrsj"
