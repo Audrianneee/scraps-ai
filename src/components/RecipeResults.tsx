@@ -48,6 +48,7 @@ const RecipeResults = ({
 }: RecipeResultsProps) => {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -81,6 +82,42 @@ const RecipeResults = ({
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadMoreRecipes = async () => {
+    setLoadingMore(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-recipes", {
+        body: {
+          ingredients: ingredients.map(i => i.name),
+          equipment,
+          preferences,
+          commonSeasonings,
+        },
+      });
+
+      if (error) throw error;
+
+      const newRecipes = data.recipes || [];
+      const updatedRecipes = [...recipes, ...newRecipes];
+      setRecipes(updatedRecipes);
+      // Update sessionStorage with all recipes
+      sessionStorage.setItem("generatedRecipes", JSON.stringify(updatedRecipes));
+      
+      toast({
+        title: "More recipes loaded!",
+        description: `Added ${newRecipes.length} new recipe options`,
+      });
+    } catch (error: any) {
+      console.error("Error loading more recipes:", error);
+      toast({
+        title: "Error loading more recipes",
+        description: error.message || "Please try again",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingMore(false);
     }
   };
 
@@ -158,6 +195,30 @@ const RecipeResults = ({
             </Card>
           ))}
         </div>
+
+        {recipes.length > 0 && (
+          <div className="mt-8 text-center">
+            <Button 
+              onClick={loadMoreRecipes} 
+              disabled={loadingMore}
+              variant="outline"
+              size="lg"
+              className="min-w-[200px]"
+            >
+              {loadingMore ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Loading More...
+                </>
+              ) : (
+                <>
+                  <ChefHat className="w-4 h-4 mr-2" />
+                  Show More Recipes
+                </>
+              )}
+            </Button>
+          </div>
+        )}
 
         {recipes.length === 0 && (
           <div className="text-center py-12 animate-fade-in">
